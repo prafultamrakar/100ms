@@ -195,4 +195,7 @@ Testing Canary or Test traffic -> Here all traffic goes to Canary for testing pu
 curl -s --cookie "canary=always" "http://127.0.0.1:[port]/api/tutorials" -H "Host: chart-example.local"
 ```
 
+## Author
+
+- [@prafultamrakar](https://github.com/prafultamrakar)
     
