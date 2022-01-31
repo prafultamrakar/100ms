@@ -42,11 +42,16 @@ git clone https://github.com/prafultamrakar/100ms.git 100ms
 Ref: https://www.vaultproject.io/docs/platform/k8s/helm/run
 ```bash
 helm install vault hashicorp/vault
+
 helm repo add hashicorp https://helm.releases.hashicorp.com
+
 helm install vault hashicorp/vault
+
 kubectl port-forward vault-0 8200:8200
+
 ## Initialize value
 kubectl exec -ti vault-0 -- vault operator init
+
 ## Unseal the first vault server until it reaches the key threshold
 kubectl exec -ti vault-0 -- vault operator unseal # ... Unseal Key 1
 kubectl exec -ti vault-0 -- vault operator unseal # ... Unseal Key 2
@@ -59,18 +64,22 @@ Copy the vault “Initial Root Token” as its very imp for authentication and a
 ### Create a Mysql Statefulsets app using bitnami chart
 ``` bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
+
 helm template mysql \
   --set image.tag=5.7,auth.rootPassword=secretpassword,auth.database=nodejs,auth.username=nodejs,auth.password=nodejs-123 \
 bitnami/mysql
+
 helm install mysql \
   --set image.tag=5.7,auth.rootPassword=secretpassword,auth.database=nodejs,auth.username=nodejs,auth.password=nodejs-123 \
 bitnami/mysql
 ##The VolumeClaimtemplate is responsible of provisioning or claming dynamic PV 
-Get mysql password 
+
+##Get mysql password 
 MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode)
 
 ###Run a pod that you can use as a client:
 kubectl run mysql-client --rm --tty -i --restart='Never' --image  docker.io/bitnami/mysql:5.7 --namespace default --command -- bash
+
 mysql -h mysql.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
 
 
@@ -88,18 +97,23 @@ published BOOLEAN DEFAULT false
 Ref: https://learn.hashicorp.com/tutorials/vault/kubernetes-sidecar
 
 Note: Replace [Initial_Root_Token] with the real initial token in previous step.
+
+Please execute these command one-by-one
 ``` bash
 kubectl exec -it vault-0 -- /bin/sh
+
 VAULT_TOKEN="[Initial_Root_Token]" vault auth enable kubernetes
+
 VAULT_TOKEN="[Initial_Root_Token]" vault write auth/kubernetes/config \
-kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
-token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
-kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-issuer="https://kubernetes.default.svc.cluster.local"
-Create a Key Value  for db credentials pair in Vault
-kubectl exec -it vault-0 -- /bin/sh
+  kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+  token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+  kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+  issuer="https://kubernetes.default.svc.cluster.local"
+
 VAULT_TOKEN="[Initial_Root_Token]" vault secrets enable kv-v2
+
 VAULT_TOKEN="[Initial_Root_Token]" vault secrets enable -path=dev/ kv
+
 VAULT_TOKEN=”[Initial_Root_Token]” vault kv put dev/db/nodejs username='nodejs' password='nodejs-123
 ```
 
