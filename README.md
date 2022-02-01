@@ -91,6 +91,10 @@ title varchar(255) NOT NULL,
 description varchar(255),
 published BOOLEAN DEFAULT false
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+INSERT INTO tutorials (title, description ) values ('Hello World','This is test tutorials')
+
 ```
 
 ### Configure Kubernetes authentication
